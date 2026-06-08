@@ -148,9 +148,9 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 .geo-opt.weather.on .ic{color:var(--blue)} .geo-opt.weather.on::after{background:var(--blue);box-shadow:0 0 0 3px #dceaf7}
 
 .geo-sero{margin:2px 0 0;padding-left:2px}
-.geo-pill-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.geo-pill{flex:1;min-width:54px;text-align:center;cursor:pointer;border:1px solid var(--line);background:var(--surface);
-  color:var(--ink-soft);padding:6px 4px;border-radius:8px;font:inherit;font-size:.7rem;font-weight:700;transition:.12s}
+.geo-pill-row{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;margin-top:6px}
+.geo-pill{min-width:0;text-align:center;cursor:pointer;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink-soft);padding:6px 2px;border-radius:8px;font:inherit;font-size:.66rem;font-weight:700;transition:.12s;white-space:nowrap}
 .geo-pill:hover{border-color:var(--ink-faint)}
 .geo-pill.wide{width:100%;flex:none}
 .geo-pill.on{color:#fff;border-color:transparent}
@@ -177,6 +177,8 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 #geo-map{position:absolute;inset:0;background:#eef3f8;z-index:1}
 .leaflet-container{background:#eef3f8;font-family:'Inter',sans-serif;outline:none}
 .geo-field{image-rendering:auto}
+.leaflet-gbase-pane{filter:grayscale(1) saturate(.25) contrast(1.08);opacity:.68}
+.leaflet-control-attribution{font-size:9px!important;background:rgba(255,255,255,.78)!important;color:#6b7280!important}
 .leaflet-control-zoom{border:none!important;box-shadow:var(--shadow)!important;margin:12px!important}
 .leaflet-control-zoom a{background:var(--surface)!important;color:var(--ink-soft)!important;border:1px solid var(--line)!important;width:28px!important;height:28px!important;line-height:26px!important}
 .leaflet-control-zoom a:hover{color:var(--accent)!important;border-color:var(--accent)!important}
@@ -251,19 +253,19 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 </header>
 
 <nav id="nav">
-  <button class="tab-btn active" data-tab="geography"><span class="ico">🗺</span>Geographic</button>
+  <button class="tab-btn active" data-tab="timeline"><span class="ico">📈</span>Epidemic Timeline</button>
+  <button class="tab-btn" data-tab="geography"><span class="ico">🗺</span>Geographic</button>
   <button class="tab-btn" data-tab="seasonal"><span class="ico">🔥</span>Seasonal Heatmap</button>
-  <button class="tab-btn" data-tab="timeline"><span class="ico">📈</span>Epidemic Timeline</button>
-  <button class="tab-btn" data-tab="demographics"><span class="ico">👥</span>Demographics</button>
-  <button class="tab-btn" data-tab="clinical"><span class="ico">🏥</span>Clinical Profile</button>
+  <button class="tab-btn" data-tab="climate"><span class="ico">🌧</span>Climate</button>
   <button class="tab-btn" data-tab="serotype"><span class="ico">🧬</span>Serotypes</button>
-  <button class="tab-btn" data-tab="climate"><span class="ico">🌧</span>Climate & Lag</button>
+  <button class="tab-btn" data-tab="clinical"><span class="ico">🏥</span>Clinical Profile</button>
+  <button class="tab-btn" data-tab="demographics"><span class="ico">👥</span>Demographics</button>
 </nav>
 
 <main>
 
 <!-- ═══════════════════════════════ GEOGRAPHIC ════════════════════════════ -->
-<section id="tab-geography" class="tab-panel geo active">
+<section id="tab-geography" class="tab-panel geo">
   <div class="geo-shell">
     <!-- ── control rail ── -->
     <aside class="geo-side">
@@ -321,6 +323,14 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 
       <div class="geo-sec">
         <div class="lbl">Display</div>
+        <button class="geo-opt on" id="geoTerrainToggle">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 18l6-9 4 6 3-4 5 7H3z"/><path d="M9 9l2 3 2-3"/></svg></span>
+          <div><div>Terrain relief</div><div class="od">hillshade base</div></div>
+        </button>
+        <button class="geo-opt on" id="geoCoastToggle">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 15c2-3 5-3 7-1s5 2 9-2"/><path d="M4 19c2-1 4-1 6 0s4 1 6 0 3-1 4 0"/><path d="M7 5c2 0 5 2 5 5"/></svg></span>
+          <div><div>Coastlines</div><div class="od">land-ocean borders</div></div>
+        </button>
         <label class="geo-check"><input type="checkbox" id="geoLabels" checked> State labels</label>
         <label class="geo-check"><input type="checkbox" id="geoTween" checked> Smooth transitions</label>
         <label class="geo-check"><input type="checkbox" id="geoLoop" checked> Loop animation</label>
@@ -386,7 +396,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 </section>
 
 <!-- ═══════════════════════════════ TIMELINE ══════════════════════════════ -->
-<section id="tab-timeline" class="tab-panel">
+<section id="tab-timeline" class="tab-panel active">
   <div class="statband" id="tl-stats"></div>
   <div class="card" style="margin-bottom:18px">
     <div class="card-h">
@@ -564,7 +574,7 @@ async function boot(){
     b.classList.add('active'); document.getElementById('tab-'+b.dataset.tab).classList.add('active');
     if(!inited[b.dataset.tab]){draw(b.dataset.tab);inited[b.dataset.tab]=true;}
   });
-  draw('geography'); inited.geography=true;
+  draw('timeline'); inited.timeline=true;
 }
 function draw(t){({seasonal:initSeasonal,timeline:initTimeline,demographics:initDemo,clinical:initClinical,serotype:initSerotype,climate:initClimate,geography:initGeography}[t])();}
 
@@ -922,15 +932,23 @@ function cmScatter(){
 }
 
 // ══════════════════════════════ GEOGRAPHIC MAP ════════════════════════════════
-let GEOD=null, geoMap=null, geoFill=null, geoBorder=null, geoField=null, geoBubbles=null, geoLabels=null, geoRenderer=null;
+let GEOD=null, geoMap=null, geoBaseLayer=null, geoFill=null, geoBorder=null, geoCoastHalo=null, geoCoast=null, geoWorldCoastHalo=null, geoWorldCoast=null, geoField=null, geoBubbles=null, geoLabels=null, geoRenderer=null;
 let geoPI={}, geoCI={}, geoCum={}, geoReg={}, geoMarkers={};
 let geoBubbleK=1, geoSeroK=1, geoWeekF=1, geoRAF=null, geoLastT=0, geoLastDraw=0, geoSpark=null;
+let geoWorldCoastData=null, geoWorldCoastLoading=false, geoCoastAttrib=false;
 const gS={year:2024, week:1, patientOn:true, sero:null, surface:null, lag:0, bubbleAlpha:0.72,
-          region:'all', stateCode:null, playing:false, loop:true, tween:true, labels:true, speed:320};
+          region:'all', stateCode:null, basemap:'terrain', coastlinesOn:true, playing:false, loop:true, tween:true, labels:true, speed:320};
 const GEO_RMIN=6, GEO_RMAX=58, GEO_REF=60000;   // bubble radius floor/cap + weekly-case reference
 const GSERO=['','#2563eb','#db2777','#ea580c','#7c3aed'];
 const GSERO_N=['','DENV-1','DENV-2','DENV-3','DENV-4'];
 const SYM_LBL={febre:'Fever',cefaleia:'Headache',mialgia:'Myalgia',exantema:'Rash',dor_retro:'Retro-orbital',nausea:'Nausea',vomito:'Vomiting',artralgia:'Arthralgia'};
+const BASEMAP={
+  terrain:{
+    url:'https://server.arcgisonline.com/ArcGIS/rest/services/Elevation/World_Hillshade/MapServer/tile/{z}/{y}/{x}',
+    opts:{maxNativeZoom:13,attribution:'Tiles &copy; Esri'}
+  }
+};
+const WORLD_COAST_URL='https://raw.githubusercontent.com/nvkelso/natural-earth-vector/master/geojson/ne_50m_coastline.geojson';
 
 const RAMP={
   inc:[[233,238,243],[254,224,182],[253,176,108],[244,109,53],[201,30,40],[120,8,28]],
@@ -979,6 +997,45 @@ function inScope(s){if(gS.stateCode)return s===gS.stateCode;if(gS.region!=='all'
 function scopeUFs(){return Object.keys(GEOD.states).filter(inScope);}
 function cumAt(y,s,w){const c=geoCum[y]&&geoCum[y][s];return c?{t:c.t[w]||0,h:c.h[w]||0,d:c.d[w]||0}:{t:0,h:0,d:0};}
 function geoFmt(n){n=Math.round(n);return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+'M':n>=1e4?(n/1e3).toFixed(0)+'k':n.toLocaleString('en-US');}
+function geoSetBasemap(v){
+  gS.basemap=v;
+  if(!geoMap)return;
+  if(geoBaseLayer){geoMap.removeLayer(geoBaseLayer);geoBaseLayer=null;}
+  const cfg=BASEMAP[v];
+  if(cfg)geoBaseLayer=L.tileLayer(cfg.url,Object.assign({pane:'gbase'},cfg.opts)).addTo(geoMap);
+  if(geoFill)geoFill.setStyle(geoFillStyle);
+}
+async function geoLoadWorldCoast(){
+  if(geoWorldCoast||geoWorldCoastLoading||!geoMap)return;
+  geoWorldCoastLoading=true;
+  try{
+    if(!geoWorldCoastData)geoWorldCoastData=await fetch(WORLD_COAST_URL).then(r=>{if(!r.ok)throw r;return r.json();});
+    geoWorldCoastHalo=L.geoJSON(geoWorldCoastData,{pane:'gworldcoast',interactive:false,style:geoWorldCoastHaloStyle});
+    geoWorldCoast=L.geoJSON(geoWorldCoastData,{pane:'gworldcoast',interactive:false,style:geoWorldCoastStyle});
+    if(!geoCoastAttrib){geoMap.attributionControl.addAttribution('Coastlines &copy; Natural Earth');geoCoastAttrib=true;}
+    geoSyncCoasts();
+  }catch(e){}finally{geoWorldCoastLoading=false;}
+}
+function geoSyncCoasts(){
+  if(!geoMap)return;
+  const layers=[geoCoastHalo,geoCoast,geoWorldCoastHalo,geoWorldCoast];
+  for(const l of layers){if(!l)continue;if(gS.coastlinesOn){if(!geoMap.hasLayer(l))l.addTo(geoMap);}else if(geoMap.hasLayer(l))geoMap.removeLayer(l);}
+  if(gS.coastlinesOn&&!geoWorldCoast)geoLoadWorldCoast();
+}
+function geoSyncDisplay(){
+  const ter=document.getElementById('geoTerrainToggle'),coast=document.getElementById('geoCoastToggle');
+  if(ter)ter.classList.toggle('on',gS.basemap!=='none');
+  if(coast)coast.classList.toggle('on',gS.coastlinesOn);
+}
+function geoOuterLines(fc){
+  const edges=new Map(),q=n=>Number(n).toFixed(5),key=(a,b)=>{
+    const ka=q(a[0])+','+q(a[1]),kb=q(b[0])+','+q(b[1]);
+    return ka<kb?ka+'|'+kb:kb+'|'+ka;
+  };
+  const addRing=ring=>{for(let i=0;i<ring.length-1;i++){const a=ring[i],b=ring[i+1],k=key(a,b),e=edges.get(k)||{n:0,seg:[a,b]};e.n++;edges.set(k,e);}};
+  for(const f of fc.features){const g=f.geometry,polys=g.type==='Polygon'?[g.coordinates]:g.coordinates;for(const poly of polys)for(const ring of poly)addRing(ring);}
+  return{type:'FeatureCollection',features:[{type:'Feature',properties:{kind:'outer'},geometry:{type:'MultiLineString',coordinates:[...edges.values()].filter(e=>e.n===1).map(e=>e.seg)}}]};
+}
 
 // ── value interpolation for a fractional week ──
 function geoValsAt(y,wkF){
@@ -1000,13 +1057,17 @@ function geoValsAt(y,wkF){
 // ── styling ──
 function geoFillStyle(feat){const s=feat.properties.sigla,sc=inScope(s);
   if(isWeather())return{stroke:false,fillOpacity:sc?0:0,fillColor:'#000'};
-  let col='#dde4ec',op=sc?0.92:0.32;
+  let col=gS.basemap==='none'?'#dde4ec':'#f6f8fb',op=sc?(gS.basemap==='none'?0.92:0.48):(gS.basemap==='none'?0.32:0.16);
   if(gS.surface==='incidence'){const inc=cumAt(gS.year,s,gS.week).t/GEOD.states[s].pop*1e5;
     col=inc<=0?'#eef2f6':gramp('inc',Math.sqrt(Math.min(inc,4000)/4000));op=sc?0.95:0.3;}
   return{stroke:false,fillColor:col,fillOpacity:op};}
 function geoBorderStyle(feat){const s=feat.properties.sigla,sel=gS.stateCode===s;
   // transparent fill makes the whole state area the hover/click hit-target
   return{fill:true,fillColor:'#000',fillOpacity:0,color:sel?'#15202b':'#aab4bf',weight:sel?2.4:0.9,opacity:inScope(s)?1:.4};}
+function geoWorldCoastHaloStyle(){return{fill:false,interactive:false,color:'#fff',weight:5.8,opacity:.72,lineJoin:'round',lineCap:'round'};}
+function geoWorldCoastStyle(){return{fill:false,interactive:false,color:'#273443',weight:2.35,opacity:.82,lineJoin:'round',lineCap:'round'};}
+function geoCoastHaloStyle(){return{fill:false,interactive:false,color:'#fff',weight:6.2,opacity:.82,lineJoin:'round',lineCap:'round'};}
+function geoCoastStyle(){return{fill:false,interactive:false,color:'#25313f',weight:2.7,opacity:.9,lineJoin:'round',lineCap:'round'};}
 
 // ── bubbles ──
 function geoPieIcon(R,ser,al){const d=Math.ceil(R*2)+2,cc=d/2,rr=R;const ss=ser[0]+ser[1]+ser[2]+ser[3];const fo=(al!=null?al:.82)+0.06;
@@ -1172,15 +1233,23 @@ async function initGeography(){
   geoBubbleK=GEO_RMAX/Math.sqrt(GEO_REF);geoSeroK=GEO_RMAX/Math.sqrt(Math.max(maxS*0.4,2000));
 
   // map
-  geoMap=L.map('geo-map',{zoomControl:true,attributionControl:false,minZoom:3,maxZoom:8,zoomSnap:.25,preferCanvas:true});
+  geoMap=L.map('geo-map',{zoomControl:true,attributionControl:true,minZoom:3,maxZoom:8,zoomSnap:.25,preferCanvas:true});
+  geoMap.createPane('gbase');geoMap.getPane('gbase').style.zIndex=180;geoMap.getPane('gbase').style.pointerEvents='none';
+  geoMap.createPane('gworldcoast');geoMap.getPane('gworldcoast').style.zIndex=300;geoMap.getPane('gworldcoast').style.pointerEvents='none';
   ['gfill','gfield','gborder'].forEach((p,i)=>{geoMap.createPane(p);geoMap.getPane(p).style.zIndex=350+i*10;});
+  geoMap.createPane('gcoast');geoMap.getPane('gcoast').style.zIndex=390;geoMap.getPane('gcoast').style.pointerEvents='none';
   geoMap.createPane('gbub');geoMap.getPane('gbub').style.zIndex=620;geoMap.getPane('gbub').style.pointerEvents='none';
   geoMap.createPane('glabel');geoMap.getPane('glabel').style.zIndex=660;geoMap.getPane('glabel').style.pointerEvents='none';
   geoRenderer=L.canvas({pane:'gbub'});
+  geoSetBasemap(gS.basemap);
   geoFill=L.geoJSON(GEO,{pane:'gfill',style:geoFillStyle}).addTo(geoMap);
   geoBorder=L.geoJSON(GEO,{pane:'gborder',style:geoBorderStyle,
     onEachFeature:(f,l)=>l.on({mouseover:e=>geoShowTip(f.properties.sigla,e),mousemove:e=>geoMoveTip(e),mouseout:geoHideTip,
       click:()=>{gS.stateCode=gS.stateCode===f.properties.sigla?null:f.properties.sigla;if(gS.stateCode){for(const r in geoReg)if(geoReg[r].includes(gS.stateCode)){gS.region=r;document.getElementById('geoRegion').value=r;}geoBuildStateOpts();}document.getElementById('geoState').value=gS.stateCode||'all';geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();}})}).addTo(geoMap);
+  const geoOuter=geoOuterLines(GEO);
+  geoCoastHalo=L.geoJSON(geoOuter,{pane:'gcoast',interactive:false,style:geoCoastHaloStyle}).addTo(geoMap);
+  geoCoast=L.geoJSON(geoOuter,{pane:'gcoast',interactive:false,style:geoCoastStyle}).addTo(geoMap);
+  geoSyncCoasts();
   geoBubbles=L.layerGroup().addTo(geoMap);geoLabels=L.layerGroup().addTo(geoMap);
   geoMap.fitBounds(geoBorder.getBounds(),{padding:[16,16]});
   geoMap.setMaxBounds(geoBorder.getBounds().pad(.5));
@@ -1193,6 +1262,8 @@ async function initGeography(){
   document.querySelectorAll('.geo-opt[data-surface]').forEach(b=>b.onclick=()=>{const v=b.dataset.surface;gS.surface=gS.surface===v?null:v;geoSyncSurface();geoRenderFrame(geoWeekF);});
   document.getElementById('geoRegion').onchange=e=>{gS.region=e.target.value;gS.stateCode=null;geoBuildStateOpts();geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();};
   document.getElementById('geoState').onchange=e=>{gS.stateCode=e.target.value==='all'?null:e.target.value;if(gS.stateCode)for(const r in geoReg)if(geoReg[r].includes(gS.stateCode)){gS.region=r;document.getElementById('geoRegion').value=r;geoBuildStateOpts();document.getElementById('geoState').value=gS.stateCode;}geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();};
+  document.getElementById('geoTerrainToggle').onclick=()=>{geoSetBasemap(gS.basemap==='none'?'terrain':'none');geoSyncDisplay();geoRenderFrame(geoWeekF);};
+  document.getElementById('geoCoastToggle').onclick=()=>{gS.coastlinesOn=!gS.coastlinesOn;geoSyncCoasts();geoSyncDisplay();};
   document.getElementById('geoLabels').onchange=e=>{gS.labels=e.target.checked;geoUpdLabels();};
   document.getElementById('geoTween').onchange=e=>{gS.tween=e.target.checked;};
   document.getElementById('geoLoop').onchange=e=>{gS.loop=e.target.checked;};
@@ -1204,7 +1275,7 @@ async function initGeography(){
   geoMap.on('zoomend',()=>{if(gS.labels)geoUpdLabels();});
 
   document.getElementById('geoYr').textContent=gS.year;
-  geoBuildStateOpts();geoBuildSpark();geoSyncSero();geoSyncSurface();
+  geoBuildStateOpts();geoBuildSpark();geoSyncSero();geoSyncSurface();geoSyncDisplay();
   // open on the year's peak week so the first frame is rich, not empty
   const pk=geoSpark.indexOf(Math.max(...geoSpark))+1;gS.week=pk>0?pk:10;geoWeekF=gS.week;
   document.getElementById('geoLoading').style.display='none';
