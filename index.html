@@ -7,7 +7,9 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
 <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <style>
 :root{
   --bg:#f4f6fa; --surface:#ffffff; --ink:#15202b; --ink-soft:#5a6b7b; --ink-faint:#90a0b0;
@@ -118,6 +120,120 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 @media(max-width:900px){.statband{grid-template-columns:repeat(2,1fr)}.cols-2{grid-template-columns:1fr!important}}
 .cols-2{grid-template-columns:1fr 1fr}
 .cols-3-2{grid-template-columns:1.4fr 1fr}
+
+/* ════════════════════════ GEOGRAPHIC WORKSPACE ════════════════════════ */
+.tab-panel.geo{max-width:none;margin:0}
+.geo-shell{display:grid;grid-template-columns:264px 1fr;gap:16px;height:calc(100vh - 250px);min-height:480px}
+.geo-side{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);overflow-y:auto;padding:14px 14px 22px}
+.geo-side::-webkit-scrollbar{width:8px}.geo-side::-webkit-scrollbar-thumb{background:var(--line);border-radius:8px}
+.geo-sec{margin-bottom:16px}
+.geo-sec>.lbl{display:flex;align-items:center;gap:7px;font-size:.66rem;font-weight:700;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--ink-faint);margin:0 2px 9px}
+.geo-sec>.lbl::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--accent)}
+.geo-note{font-size:.68rem;color:var(--ink-faint);line-height:1.45;margin:8px 2px 0}
+
+.geo-opt{display:flex;align-items:center;gap:9px;width:100%;text-align:left;cursor:pointer;
+  border:1px solid var(--line);background:var(--surface);color:var(--ink);
+  padding:9px 11px;border-radius:10px;font:inherit;font-size:.78rem;font-weight:600;transition:.13s;position:relative;margin-bottom:6px}
+.geo-opt:hover{border-color:var(--ink-faint);background:var(--line-soft)}
+.geo-opt .ic{width:16px;height:16px;flex:none;color:var(--ink-faint);display:grid;place-items:center}
+.geo-opt .ic svg{width:16px;height:16px}
+.geo-opt .od{font-size:.66rem;color:var(--ink-faint);font-weight:500;margin-top:1px}
+.geo-opt.on{border-color:var(--accent);background:var(--accent-soft);color:var(--accent-deep)}
+.geo-opt.on .ic{color:var(--accent)}
+.geo-opt.on::after{content:'';position:absolute;right:10px;top:50%;transform:translateY(-50%);
+  width:7px;height:7px;border-radius:50%;background:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.geo-opt.weather.on{border-color:var(--blue);background:#eaf3fb;color:#0c4a73}
+.geo-opt.weather.on .ic{color:var(--blue)} .geo-opt.weather.on::after{background:var(--blue);box-shadow:0 0 0 3px #dceaf7}
+
+.geo-sero{margin:2px 0 0;padding-left:2px}
+.geo-pill-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
+.geo-pill{flex:1;min-width:54px;text-align:center;cursor:pointer;border:1px solid var(--line);background:var(--surface);
+  color:var(--ink-soft);padding:6px 4px;border-radius:8px;font:inherit;font-size:.7rem;font-weight:700;transition:.12s}
+.geo-pill:hover{border-color:var(--ink-faint)}
+.geo-pill.wide{width:100%;flex:none}
+.geo-pill.on{color:#fff;border-color:transparent}
+.geo-pill.all.on{background:var(--ink);color:#fff}
+.geo-pill.s1.on{background:#2563eb}.geo-pill.s2.on{background:#db2777}
+.geo-pill.s3.on{background:#ea580c}.geo-pill.s4.on{background:#7c3aed}
+.geo-pill.disabled{opacity:.45;pointer-events:none}
+
+.geo-side select{width:100%;margin-bottom:7px}
+.geo-check{display:flex;align-items:center;gap:9px;cursor:pointer;font-size:.74rem;color:var(--ink-soft);font-weight:600;padding:5px 2px}
+.geo-check input{appearance:none;width:32px;height:18px;border-radius:11px;background:var(--line);position:relative;cursor:pointer;transition:.15s;flex:none}
+.geo-check input:checked{background:var(--accent)}
+.geo-check input::after{content:'';position:absolute;width:13px;height:13px;border-radius:50%;background:#fff;top:2.5px;left:3px;transition:.15s;box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.geo-check input:checked::after{left:16px}
+.geo-slider{margin:9px 2px 2px}
+.geo-slider label{display:flex;justify-content:space-between;font-size:.7rem;color:var(--ink-soft);font-weight:600;margin-bottom:4px}
+.geo-slider label span{font-family:'JetBrains Mono',monospace;color:var(--accent);font-weight:700}
+.geo-slider input{width:100%;accent-color:var(--accent);cursor:pointer}
+.geo-slider.lag input{accent-color:var(--blue)} .geo-slider.lag label span{color:var(--blue)}
+.geo-slider.dim{opacity:.4;pointer-events:none}
+
+/* map */
+.geo-mapwrap{position:relative;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow);background:#eef3f8}
+#geo-map{position:absolute;inset:0;background:#eef3f8;z-index:1}
+.leaflet-container{background:#eef3f8;font-family:'Inter',sans-serif;outline:none}
+.geo-field{image-rendering:auto}
+.leaflet-control-zoom{border:none!important;box-shadow:var(--shadow)!important;margin:12px!important}
+.leaflet-control-zoom a{background:var(--surface)!important;color:var(--ink-soft)!important;border:1px solid var(--line)!important;width:28px!important;height:28px!important;line-height:26px!important}
+.leaflet-control-zoom a:hover{color:var(--accent)!important;border-color:var(--accent)!important}
+.geo-slabel{background:none;border:none;box-shadow:none;color:#3a4756;font-weight:700;font-size:.62rem;
+  text-shadow:0 1px 2px #fff,0 0 3px #fff;pointer-events:none;white-space:nowrap;text-align:center}
+.geo-pie{pointer-events:none}
+
+/* floating panels */
+.geo-float{position:absolute;z-index:500;background:rgba(255,255,255,.93);backdrop-filter:blur(8px);
+  border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow-lg)}
+.geo-kpis{top:12px;left:12px;padding:11px 13px;display:grid;grid-template-columns:1fr 1fr;gap:9px 18px;min-width:226px}
+.geo-kpis .k{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+.geo-kpis .v{font-size:1.05rem;font-weight:800;font-variant-numeric:tabular-nums;line-height:1.1;margin-top:1px;color:var(--ink)}
+.geo-kpis .v small{font-size:.72rem;color:var(--ink-soft);font-weight:500}
+.geo-kpis .full{grid-column:1/-1;border-top:1px solid var(--line);padding-top:7px;display:flex;justify-content:space-between;align-items:baseline}
+.geo-legend{bottom:12px;left:12px;padding:11px 13px;min-width:158px}
+.geo-legend .lt{font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-faint);font-weight:700;margin-bottom:8px;display:flex;justify-content:space-between;gap:10px}
+.geo-legend .lt b{color:var(--ink);font-weight:800;text-transform:none;letter-spacing:0;font-size:.74rem}
+.geo-lrow{display:flex;align-items:center;gap:8px;margin:3px 0;font-size:.7rem;color:var(--ink-soft)}
+.geo-lsw{width:15px;height:12px;border-radius:3px;flex:none;border:1px solid rgba(0,0,0,.06)}
+.geo-lrow .gv{font-variant-numeric:tabular-nums}
+.geo-layerchip{top:12px;right:52px;padding:7px 13px;display:flex;align-items:center;gap:9px;max-width:240px}
+.geo-layerchip .dot{width:9px;height:9px;border-radius:50%;flex:none;background:var(--accent)}
+.geo-layerchip .t{font-size:.78rem;font-weight:700;color:var(--ink)}
+.geo-layerchip .s{font-size:.66rem;color:var(--ink-faint)}
+
+.geo-tip{position:absolute;z-index:600;pointer-events:none;background:rgba(255,255,255,.97);border:1px solid var(--line);
+  border-radius:11px;padding:10px 12px;box-shadow:var(--shadow-lg);opacity:0;transition:opacity .1s;max-width:248px;font-size:.74rem}
+.geo-tip .nm{font-weight:800;font-size:.86rem;margin-bottom:6px;display:flex;align-items:center;gap:7px;color:var(--ink)}
+.geo-tip .nm .rg{font-size:.6rem;color:var(--ink-faint);font-weight:600;border:1px solid var(--line);padding:1px 6px;border-radius:6px;text-transform:uppercase;letter-spacing:.05em}
+.geo-tip .g{display:grid;grid-template-columns:auto auto;gap:2px 14px}
+.geo-tip .g .l{color:var(--ink-soft)} .geo-tip .g .r{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:var(--ink)}
+.geo-tip .sy{margin-top:7px;padding-top:7px;border-top:1px solid var(--line);display:flex;flex-wrap:wrap;gap:4px}
+.geo-tip .sy span{font-size:.64rem;background:var(--line-soft);color:var(--ink-soft);padding:2px 6px;border-radius:6px;font-weight:600}
+
+/* time bar */
+.geo-timebar{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:12px 16px;margin-top:16px;display:flex;align-items:center;gap:16px}
+.geo-play{width:42px;height:42px;border-radius:11px;border:none;background:var(--accent);color:#fff;cursor:pointer;
+  display:grid;place-items:center;flex:none;transition:.15s;box-shadow:0 2px 8px rgba(193,18,31,.35)}
+.geo-play:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(193,18,31,.4)}
+.geo-play svg{width:18px;height:18px}
+.geo-wk{flex:none;min-width:108px}
+.geo-wk .k{font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-faint);font-weight:700}
+.geo-wk .v{font-family:'JetBrains Mono',monospace;font-size:1.15rem;font-weight:700;color:var(--ink)}
+.geo-wk .v small{color:var(--ink-faint);font-size:.78rem;font-weight:400}
+.geo-chartwrap{flex:1;min-width:0;height:46px;position:relative}
+.geo-chartwrap svg{width:100%;height:100%;overflow:visible;display:block;cursor:crosshair}
+.geo-yearsel{flex:none;display:flex;align-items:center;gap:7px}
+.geo-yearsel .yr{font-family:'JetBrains Mono',monospace;font-weight:700;font-size:1.1rem;color:var(--ink);min-width:52px;text-align:center}
+.geo-stepper{display:flex;gap:3px}
+.geo-stepper button{border:1px solid var(--line);background:var(--surface);width:26px;height:26px;border-radius:7px;cursor:pointer;color:var(--ink-soft);font-weight:700;line-height:1}
+.geo-stepper button:hover{border-color:var(--accent);color:var(--accent)}
+.geo-speed{flex:none;display:flex;align-items:center;gap:6px;color:var(--ink-faint);font-size:.64rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase}
+.geo-speed select{padding:5px 8px;font-size:.72rem;margin:0}
+.geo-loading{position:absolute;inset:0;display:grid;place-items:center;color:var(--ink-faint);font-size:.85rem;z-index:700;background:#eef3f8}
+@media(max-width:980px){.geo-shell{grid-template-columns:1fr;height:auto}.geo-side{height:auto;max-height:none}.geo-mapwrap{height:60vh}}
 </style>
 </head>
 <body>
@@ -135,28 +251,113 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
 </header>
 
 <nav id="nav">
-  <button class="tab-btn soon" data-tab="geography"><span class="ico">🗺</span>Geographic</button>
-  <button class="tab-btn active" data-tab="seasonal"><span class="ico">🔥</span>Seasonal Heatmap</button>
+  <button class="tab-btn active" data-tab="geography"><span class="ico">🗺</span>Geographic</button>
+  <button class="tab-btn" data-tab="seasonal"><span class="ico">🔥</span>Seasonal Heatmap</button>
   <button class="tab-btn" data-tab="timeline"><span class="ico">📈</span>Epidemic Timeline</button>
   <button class="tab-btn" data-tab="demographics"><span class="ico">👥</span>Demographics</button>
   <button class="tab-btn" data-tab="clinical"><span class="ico">🏥</span>Clinical Profile</button>
+  <button class="tab-btn" data-tab="serotype"><span class="ico">🧬</span>Serotypes</button>
   <button class="tab-btn" data-tab="climate"><span class="ico">🌧</span>Climate & Lag</button>
 </nav>
 
 <main>
 
-<!-- ═══════════════════════════════ GEOGRAPHIC (placeholder) ═══════════════ -->
-<section id="tab-geography" class="tab-panel">
-  <div class="placeholder"><div class="inner">
-    <div class="pic">🗺️</div>
-    <h2>Geographic Mapping</h2>
-    <p>Choropleth and incidence maps will be built here once the spatial GRIB layers are processed. This view will link case density with the climate grid at state and municipality resolution.</p>
-    <span class="tag">ON HOLD · BUILDING LAST</span>
-  </div></div>
+<!-- ═══════════════════════════════ GEOGRAPHIC ════════════════════════════ -->
+<section id="tab-geography" class="tab-panel geo active">
+  <div class="geo-shell">
+    <!-- ── control rail ── -->
+    <aside class="geo-side">
+      <div class="geo-sec">
+        <div class="lbl">Patient layer</div>
+        <button class="geo-opt on" id="geoPatientToggle">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3" fill="currentColor"/></svg></span>
+          <div><div>Case circles</div><div class="od">bubble size = weekly cases</div></div>
+        </button>
+        <div class="geo-sero" id="geoSeroBox">
+          <button class="geo-pill all wide" data-sero="pie" id="geoSeroAll">All · serotype pie</button>
+          <div class="geo-pill-row">
+            <button class="geo-pill s1" data-sero="1">DENV-1</button>
+            <button class="geo-pill s2" data-sero="2">DENV-2</button>
+            <button class="geo-pill s3" data-sero="3">DENV-3</button>
+            <button class="geo-pill s4" data-sero="4">DENV-4</button>
+          </div>
+          <div class="geo-note" id="geoSeroNote">Plain circles. <b>All</b> splits each circle into a serotype pie; a single DENV button sizes circles by that serotype only.</div>
+        </div>
+        <div class="geo-slider"><label>Circle opacity <span id="geoAlphaV">72%</span></label><input type="range" id="geoAlpha" min="10" max="100" value="72"></div>
+      </div>
+
+      <div class="geo-sec">
+        <div class="lbl">Surface</div>
+        <button class="geo-opt" data-surface="incidence">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 17l6-6 4 4 7-8"/><path d="M21 7v5h-5"/></svg></span>
+          <div><div>Incidence /100k</div><div class="od">state fill · cumulative YTD</div></div>
+        </button>
+        <button class="geo-opt weather" data-surface="temp">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14V5a2 2 0 1 0-4 0v9a4 4 0 1 0 4 0z"/></svg></span>
+          <div><div>Temperature</div><div class="od">ERA5 · weekly mean °C</div></div>
+        </button>
+        <button class="geo-opt weather" data-surface="rain">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17a5 5 0 0 1-1-9.9A6 6 0 0 1 18 7a4 4 0 0 1 .5 8M8 19l-1 2M12 19l-1 2M16 19l-1 2"/></svg></span>
+          <div><div>Rainfall</div><div class="od">ERA5 · weekly total mm</div></div>
+        </button>
+        <button class="geo-opt weather" data-surface="rh">
+          <span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2s6 7 6 11a6 6 0 0 1-12 0c0-4 6-11 6-11z"/></svg></span>
+          <div><div>Humidity</div><div class="od">relative humidity %</div></div>
+        </button>
+        <div class="geo-note">Pick one surface, or click it again to hide. Weather fields are smoothly interpolated from the ERA5 grid.</div>
+        <div class="geo-slider lag" id="geoLagCtrl"><label>Weather lag vs cases <span id="geoLagV">0 wk</span></label><input type="range" id="geoLag" min="-8" max="8" value="0"></div>
+        <div class="geo-note" id="geoLagNote">Needs a weather surface. <b>+6 wk</b> shows the rain/heat from 6 weeks <i>before</i> each week's cases — the rain→outbreak delay.</div>
+      </div>
+
+      <div class="geo-sec">
+        <div class="lbl">Focus</div>
+        <select id="geoRegion">
+          <option value="all">All Brazil</option>
+          <option value="N">North</option><option value="NE">Northeast</option>
+          <option value="SE">Southeast</option><option value="S">South</option><option value="CO">Central-West</option>
+        </select>
+        <select id="geoState"></select>
+      </div>
+
+      <div class="geo-sec">
+        <div class="lbl">Display</div>
+        <label class="geo-check"><input type="checkbox" id="geoLabels" checked> State labels</label>
+        <label class="geo-check"><input type="checkbox" id="geoTween" checked> Smooth transitions</label>
+        <label class="geo-check"><input type="checkbox" id="geoLoop" checked> Loop animation</label>
+        <div class="geo-note" style="border-top:1px solid var(--line);padding-top:11px;margin-top:11px">
+          Circles &amp; incidence from SINAN notifications. Weather from ERA5 reanalysis, aggregated per state and interpolated. Confirmed-case counts collapse in recent years — a known SINAN coding artefact — so circles size by <b>notified</b> cases.</div>
+      </div>
+    </aside>
+
+    <!-- ── map ── -->
+    <div class="geo-mapwrap">
+      <div id="geo-map"></div>
+      <div class="geo-loading" id="geoLoading">Loading map &amp; weekly grids…</div>
+      <div class="geo-float geo-layerchip" id="geoChip"><span class="dot" id="geoChipDot"></span><div><div class="t" id="geoChipT">—</div><div class="s" id="geoChipS"></div></div></div>
+      <div class="geo-float geo-kpis" id="geoKpis"></div>
+      <div class="geo-float geo-legend" id="geoLegend"></div>
+      <div class="geo-tip" id="geoTip"></div>
+    </div>
+  </div>
+
+  <!-- ── time controls ── -->
+  <div class="geo-timebar">
+    <button class="geo-play" id="geoPlay" title="Play / pause"><svg id="geoPlayIc" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+    <div class="geo-wk"><div class="k">Epi-week</div><div class="v">W<span id="geoWkV">01</span> <small>/ 53</small></div></div>
+    <div class="geo-chartwrap"><svg id="geoChart" preserveAspectRatio="none"></svg></div>
+    <div class="geo-speed">Speed
+      <select id="geoSpeed"><option value="600">0.5×</option><option value="320" selected>1×</option><option value="160">2×</option><option value="80">4×</option></select>
+    </div>
+    <div class="geo-yearsel">
+      <div class="geo-stepper"><button id="geoYrDown">‹</button></div>
+      <div class="yr" id="geoYr">—</div>
+      <div class="geo-stepper"><button id="geoYrUp">›</button></div>
+    </div>
+  </div>
 </section>
 
 <!-- ═══════════════════════════════ SEASONAL HEATMAP ══════════════════════ -->
-<section id="tab-seasonal" class="tab-panel active">
+<section id="tab-seasonal" class="tab-panel">
   <div class="card" style="margin-bottom:18px">
     <div class="card-h">
       <h2>Seasonal Signature — Cases · Temperature · Rainfall</h2>
@@ -262,6 +463,33 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
   </div>
 </section>
 
+<!-- ═══════════════════════════════ SEROTYPES ═════════════════════════════ -->
+<section id="tab-serotype" class="tab-panel">
+  <div class="card" style="margin-bottom:18px">
+    <div class="card-h">
+      <h2>Serotype Composition by Year</h2>
+      <span class="sub">Lab-confirmed DENV typing · 2007–2025</span>
+    </div>
+    <p class="desc">Which of the four dengue serotypes circulated each year. Switch to <b>100 %</b> to read dominance at a glance — when a previously rare serotype surges into a population with little immunity to it, the largest outbreaks tend to follow. <b>Click any year</b> to break it down month-by-month below.</p>
+    <div class="controls" style="margin-bottom:6px">
+      <div class="ctrl"><label>Mode</label>
+        <div class="seg" id="st-mode"><button data-v="abs" class="on">Absolute</button><button data-v="pct">100 %</button><button data-v="log">Log</button></div></div>
+    </div>
+    <div id="st-yearly" class="plot"></div>
+  </div>
+  <div class="card">
+    <div class="card-h">
+      <h2 id="st-month-title">Monthly Serotype Dynamics</h2>
+      <span class="sub" id="st-month-sub"></span>
+    </div>
+    <p class="desc">Proportion of each serotype among typed cases, month by month — exposing within-season replacement, where one serotype hands off to another as the year unfolds. Grey bars show how many cases were typed each month, so sparsely-sampled points are easy to discount.</p>
+    <div class="controls" style="margin-bottom:6px">
+      <div class="ctrl"><label>Year</label><select id="st-year"></select></div>
+    </div>
+    <div id="st-monthly" class="plot"></div>
+  </div>
+</section>
+
 <!-- ═══════════════════════════════ CLIMATE & LAG ═════════════════════════ -->
 <section id="tab-climate" class="tab-panel">
   <div class="card" style="margin-bottom:18px">
@@ -273,7 +501,7 @@ input[type=range]{accent-color:var(--accent);cursor:pointer}
     <div class="controls" style="margin-bottom:6px">
       <div class="ctrl"><label>Year</label><select id="cm-year"></select></div>
       <div class="ctrl"><label>Overlay</label>
-        <div class="seg" id="cm-var"><button data-v="tp" class="on">Rain</button><button data-v="t2m">Temp</button><button data-v="rh">Humidity</button></div></div>
+        <div class="seg" id="cm-var"><button data-v="tp" class="on">Rain</button><button data-v="t2m">Temp</button><button data-v="rh">Humidity</button><button data-v="all">All</button></div></div>
       <div class="ctrl"><label>Shift cases</label>
         <input type="range" id="cm-lag" min="-8" max="8" value="0" step="1" style="width:180px">
         <span class="val-pill" id="cm-lag-val">0 wk</span></div>
@@ -336,9 +564,9 @@ async function boot(){
     b.classList.add('active'); document.getElementById('tab-'+b.dataset.tab).classList.add('active');
     if(!inited[b.dataset.tab]){draw(b.dataset.tab);inited[b.dataset.tab]=true;}
   });
-  draw('seasonal'); inited.seasonal=true;
+  draw('geography'); inited.geography=true;
 }
-function draw(t){({seasonal:initSeasonal,timeline:initTimeline,demographics:initDemo,clinical:initClinical,climate:initClimate,geography:()=>{}}[t])();}
+function draw(t){({seasonal:initSeasonal,timeline:initTimeline,demographics:initDemo,clinical:initClinical,serotype:initSerotype,climate:initClimate,geography:initGeography}[t])();}
 
 function fillSelectors(){
   const yrs=[...new Set(D.timeline.annual.map(d=>d.year))].sort();
@@ -548,6 +776,66 @@ function clCFR(){
      legend:{orientation:'h',y:1.12},margin:{l:54,r:54,t:24,b:40}},260);
 }
 
+// ══════════════════════════════ SEROTYPES ═════════════════════════════════════
+const SEROT_ORDER=['DENV-1','DENV-2','DENV-3','DENV-4'];
+const MONTHS=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function initSerotype(){
+  const yrs=[...new Set(D.serotype.by_month.map(d=>d.year))].sort();
+  const sel=document.getElementById('st-year');
+  yrs.forEach(y=>sel.insertAdjacentHTML('beforeend',`<option>${y}</option>`));
+  const def=yrs.includes(2024)?2024:yrs[yrs.length-1];
+  sel.value=def;
+  serotypeYearly(); serotypeMonthly(def);
+  segWire('st-mode',serotypeYearly);
+  sel.onchange=e=>serotypeMonthly(+e.target.value);
+  // Click a year in the composition chart to drill into its months
+  document.getElementById('st-yearly').on('plotly_click',ev=>{
+    const yr=ev.points[0].x; sel.value=String(yr); serotypeMonthly(+yr);
+    document.getElementById('st-monthly').scrollIntoView({behavior:'smooth',block:'center'});
+  });
+}
+function serotypeYearly(){
+  const mode=document.querySelector('#st-mode .on').dataset.v, pct=mode==='pct', log=mode==='log';
+  const src=D.serotype.by_year;
+  const yrs=[...new Set(src.map(d=>d.year))].sort();
+  const tot={}; yrs.forEach(y=>tot[y]=src.filter(d=>d.year===y).reduce((s,d)=>s+d.count,0));
+  const tr=SEROT_ORDER.map(s=>{
+    const y=yrs.map(yr=>{const r=src.find(d=>d.year===yr&&d.sorotipo===s);const v=r?r.count:0;return pct?(tot[yr]?v/tot[yr]*100:0):v;});
+    return {x:yrs,y,name:s,type:'bar',marker:{color:SEROT[s]},
+      hovertemplate:`<b>%{x}</b> · ${s}<br>`+(pct?'%{y:.1f}%':'%{y:,}')+'<extra></extra>'};
+  });
+  // Log mode: grouped bars on a log axis so every serotype-year is legible
+  // across the 2008→2024 range (2024 no longer dwarfs the rest).
+  PLOT('st-yearly',tr,{barmode:log?'group':'stack',bargap:log?.2:.12,
+    xaxis:{dtick:2,title:''},
+    yaxis:{title:pct?'% of typed cases':'Typed cases',gridcolor:GRID,
+      tickformat:pct?'':'~s',type:log?'log':'linear',range:pct?[0,100]:null},
+    legend:{orientation:'h',y:-0.16}},360);
+}
+function serotypeMonthly(year){
+  const rows=D.serotype.by_month.filter(d=>d.year===year);
+  const months=Array.from({length:12},(_,i)=>i+1);
+  const monthTot={}; months.forEach(m=>monthTot[m]=0);
+  rows.forEach(d=>monthTot[d.month]+=d.count);
+  const yearTot=months.reduce((s,m)=>s+monthTot[m],0);
+  document.getElementById('st-month-title').textContent=`Monthly Serotype Dynamics — ${year}`;
+  document.getElementById('st-month-sub').textContent=`${fmt(yearTot)} typed cases`;
+  // lines on the overlay axis (y2) so they paint ON TOP of the sample-size bars
+  const lines=SEROT_ORDER.map(s=>{
+    const y=months.map(m=>{const r=rows.find(d=>d.month===m&&d.sorotipo===s);const v=r?r.count:0;return monthTot[m]?v/monthTot[m]*100:null;});
+    return {x:MONTHS,y,name:s,type:'scatter',mode:'lines+markers',connectgaps:true,yaxis:'y2',
+      line:{color:SEROT[s],width:2.8,shape:'spline'},marker:{size:6,color:SEROT[s]},
+      hovertemplate:`<b>%{x} ${year}</b> · ${s}<br>%{y:.1f}% of typed<extra></extra>`};
+  });
+  const bars={x:MONTHS,y:months.map(m=>monthTot[m]),name:'Typed cases',type:'bar',
+    marker:{color:'#cbd5e1'},opacity:.9,hovertemplate:'%{x}: %{y:,} typed<extra></extra>',showlegend:false};
+  PLOT('st-monthly',[bars,...lines],{
+    xaxis:{title:'',tickangle:0,showgrid:false},
+    yaxis:{title:'Typed cases / month',gridcolor:GRID,zeroline:false,tickformat:'~s',rangemode:'tozero'},
+    yaxis2:{title:'% of typed cases',overlaying:'y',side:'right',range:[0,100],showgrid:false,zeroline:false},
+    legend:{orientation:'h',y:-0.16},hovermode:'x unified',margin:{l:54,r:54,t:14,b:42}},380);
+}
+
 // ══════════════════════════════ CLIMATE & LAG ═════════════════════════════════
 function initClimate(){
   cmWeekly(); cmXcorr(); cmScatter();
@@ -562,6 +850,25 @@ function cmWeekly(){
   const lag=+document.getElementById('cm-lag').value;
   const src=D.climate.weekly.filter(d=>d.year===yr&&d.week>=1&&d.week<=52).sort((a,b)=>a.week-b.week);
   const wk=src.map(d=>d.week), cases=src.map(d=>d.cases||0);
+  const shiftedAll=wk.map((_,i)=>{const j=i-lag;return j>=0&&j<cases.length?cases[j]:null;});
+  if(v==='all'){
+    const series=[['tp_mm','Rainfall','#1d6fb8','mm'],['t2m_c','Temperature','#e08a00','°C'],['rh_pct','Humidity','#0d9488','%']];
+    const traces=[{x:wk,y:shiftedAll,type:'bar',name:`Cases${lag?` (${lag>0?'+':''}${lag}w)`:''}`,
+      marker:{color:'rgba(193,18,31,.4)',line:{color:'#c1121f',width:.6}},hovertemplate:'W%{x}<br>%{y:,} cases<extra></extra>'}];
+    const rparts=[];
+    series.forEach(([key,nm,col,unit])=>{const raw=src.map(d=>d[key]),valid=raw.filter(x=>x!=null);if(!valid.length)return;
+      const mn=Math.min(...valid),mx=Math.max(...valid),rng=(mx-mn)||1,norm=raw.map(x=>x==null?null:(x-mn)/rng);
+      traces.push({x:wk,y:norm,type:'scatter',mode:'lines',name:nm,yaxis:'y2',connectgaps:true,line:{color:col,width:2.4,shape:'spline'},
+        customdata:raw,hovertemplate:`W%{x} · ${nm}<br>%{customdata:.1f} ${unit}<extra></extra>`});
+      const pa=[],pb=[];shiftedAll.forEach((c,i)=>{if(c!=null&&raw[i]!=null){pa.push(c);pb.push(raw[i]);}});
+      const rr=pearson(pa,pb);if(!isNaN(rr))rparts.push(`${nm.toLowerCase()} ${rr.toFixed(2)}`);});
+    document.getElementById('cm-rh-note').textContent='Climate lines are min–max scaled so their timing can be compared against the case curve; hover for real values.';
+    document.getElementById('cl-corr-readout').textContent=rparts.length?`r — ${rparts.join(' · ')} at ${lag>0?'+':''}${lag} wk`:'';
+    PLOT('cm-weekly',traces,{xaxis:{title:'Epidemiological week',dtick:4},yaxis:{title:'Cases',gridcolor:GRID,tickformat:'~s'},
+      yaxis2:{title:'climate (scaled)',overlaying:'y',side:'right',range:[0,1.02],showticklabels:false,showgrid:false},
+      legend:{orientation:'h',y:1.14},margin:{l:56,r:24,t:26,b:42},barmode:'overlay'},380);
+    return;
+  }
   const clim={tp:src.map(d=>d.tp_mm),t2m:src.map(d=>d.t2m_c),rh:src.map(d=>d.rh_pct)}[v];
   const meta={tp:['Rainfall (mm)','#1d6fb8'],t2m:['Temperature (°C)','#e08a00'],rh:['Humidity (%)','#0d9488']}[v];
   // shift cases by lag (positive = later)
@@ -613,6 +920,305 @@ function cmScatter(){
     {xaxis:{title:'Mean annual temperature (°C)',gridcolor:GRID},yaxis:{title:'Annual cases',gridcolor:GRID,tickformat:'~s'},
      margin:{l:60,r:60,t:14,b:44},showlegend:false},300);
 }
+
+// ══════════════════════════════ GEOGRAPHIC MAP ════════════════════════════════
+let GEOD=null, geoMap=null, geoFill=null, geoBorder=null, geoField=null, geoBubbles=null, geoLabels=null, geoRenderer=null;
+let geoPI={}, geoCI={}, geoCum={}, geoReg={}, geoMarkers={};
+let geoBubbleK=1, geoSeroK=1, geoWeekF=1, geoRAF=null, geoLastT=0, geoLastDraw=0, geoSpark=null;
+const gS={year:2024, week:1, patientOn:true, sero:null, surface:null, lag:0, bubbleAlpha:0.72,
+          region:'all', stateCode:null, playing:false, loop:true, tween:true, labels:true, speed:320};
+const GEO_RMIN=6, GEO_RMAX=58, GEO_REF=60000;   // bubble radius floor/cap + weekly-case reference
+const GSERO=['','#2563eb','#db2777','#ea580c','#7c3aed'];
+const GSERO_N=['','DENV-1','DENV-2','DENV-3','DENV-4'];
+const SYM_LBL={febre:'Fever',cefaleia:'Headache',mialgia:'Myalgia',exantema:'Rash',dor_retro:'Retro-orbital',nausea:'Nausea',vomito:'Vomiting',artralgia:'Arthralgia'};
+
+const RAMP={
+  inc:[[233,238,243],[254,224,182],[253,176,108],[244,109,53],[201,30,40],[120,8,28]],
+  temp:[[55,118,178],[108,178,212],[224,232,196],[244,176,99],[214,64,45]],
+  rain:[[247,244,236],[206,228,212],[122,198,200],[42,142,192],[18,64,140]],
+  rh:[[176,124,72],[222,204,150],[150,202,184],[70,162,182],[28,86,158]],
+};
+const SURF={
+  incidence:{key:'inc',unit:'/100k',label:'Incidence YTD',fill:true,fmt:v=>v.toFixed(0)},
+  temp:{key:'temp',ramp:'temp',min:18,max:32,unit:'°C',label:'Temperature',field:true,fmt:v=>v.toFixed(1)},
+  rain:{key:'rain',ramp:'rain',min:0,max:100,unit:'mm',label:'Rainfall · weekly',field:true,fmt:v=>v.toFixed(0)},
+  rh:{key:'rh',ramp:'rh',min:42,max:96,unit:'%',label:'Humidity',field:true,fmt:v=>v.toFixed(0)},
+};
+function gramp(name,t){const s=RAMP[name];t=t<0?0:t>1?1:t;const x=t*(s.length-1),i=Math.floor(x),f=x-i,a=s[i],b=s[Math.min(s.length-1,i+1)];
+  return`rgb(${Math.round(a[0]+(b[0]-a[0])*f)},${Math.round(a[1]+(b[1]-a[1])*f)},${Math.round(a[2]+(b[2]-a[2])*f)})`;}
+
+// ── weather field (fixed-bbox image, Mercator-aligned rows) ──
+const FB=[[-33.9,-74.1],[5.6,-34.0]], FW=200, FH=214;       // [[S,W],[N,E]]
+function mercY(la){return Math.log(Math.tan(Math.PI/4+la*Math.PI/360));}
+const FmN=mercY(FB[1][0]),FmS=mercY(FB[0][0]),Fw=FB[0][1],Fe=FB[1][1];
+const fcol=lo=>(lo-Fw)/(Fe-Fw)*FW, frow=la=>(FmN-mercY(la))/(FmN-FmS)*FH;
+let geoLand=null, geoCent={};
+const _fa=document.createElement('canvas'),_fb=document.createElement('canvas');
+_fa.width=_fb.width=FW;_fa.height=_fb.height=FH;
+function geoBuildFieldGeom(){
+  geoLand=new Path2D();
+  for(const f of GEO.features){const g=f.geometry,ps=g.type==='Polygon'?[g.coordinates]:g.coordinates;
+    for(const poly of ps){const ring=poly[0];ring.forEach((p,i)=>{const x=fcol(p[0]),y=frow(p[1]);i?geoLand.lineTo(x,y):geoLand.moveTo(x,y);});geoLand.closePath();}}
+  geoCent={};for(const s in GEOD.states){const st=GEOD.states[s];geoCent[s]={c:fcol(st.lon),r:frow(st.lat)};}
+}
+function geoFieldURL(cv,surf){
+  const cps=[];for(const s in geoCent){const v=cv[s];if(v==null||isNaN(v))continue;cps.push([geoCent[s].c,geoCent[s].r,v]);}
+  const ctx=_fb.getContext('2d'),img=ctx.createImageData(FW,FH),d=img.data,rn=surf.ramp,mn=surf.min,mx=surf.max,sp=RAMP[rn];
+  for(let r=0;r<FH;r++)for(let c=0;c<FW;c++){let num=0,den=0;
+    for(let k=0;k<cps.length;k++){const dx=c-cps[k][0],dy=r-cps[k][1];let d2=dx*dx+dy*dy;if(d2<1)d2=1;const w=1/d2;num+=w*cps[k][2];den+=w;}
+    let t=(num/den-mn)/(mx-mn);t=t<0?0:t>1?1:t;const x=t*(sp.length-1),i0=Math.floor(x),f=x-i0,a=sp[i0],b=sp[Math.min(sp.length-1,i0+1)];
+    const o=(r*FW+c)*4;d[o]=a[0]+(b[0]-a[0])*f;d[o+1]=a[1]+(b[1]-a[1])*f;d[o+2]=a[2]+(b[2]-a[2])*f;d[o+3]=255;}
+  ctx.putImageData(img,0,0);
+  const c2=_fa.getContext('2d');c2.clearRect(0,0,FW,FH);c2.save();c2.clip(geoLand);c2.drawImage(_fb,0,0);c2.restore();
+  return _fa.toDataURL();
+}
+
+// ── helpers ──
+const isWeather=()=>gS.surface&&SURF[gS.surface]&&SURF[gS.surface].field;
+function inScope(s){if(gS.stateCode)return s===gS.stateCode;if(gS.region!=='all')return geoReg[gS.region].includes(s);return true;}
+function scopeUFs(){return Object.keys(GEOD.states).filter(inScope);}
+function cumAt(y,s,w){const c=geoCum[y]&&geoCum[y][s];return c?{t:c.t[w]||0,h:c.h[w]||0,d:c.d[w]||0}:{t:0,h:0,d:0};}
+function geoFmt(n){n=Math.round(n);return n>=1e6?(n/1e6).toFixed(n>=1e7?0:1)+'M':n>=1e4?(n/1e3).toFixed(0)+'k':n.toLocaleString('en-US');}
+
+// ── value interpolation for a fractional week ──
+function geoValsAt(y,wkF){
+  const lo=Math.max(1,Math.floor(wkF)),hi=Math.min(53,lo+1),f=(gS.tween&&gS.playing)?(wkF-lo):0;
+  // weather field can be lagged ±N weeks against the case bubbles
+  const cw=Math.max(1,Math.min(53,wkF-(isWeather()?gS.lag:0)));
+  const clo=Math.max(1,Math.floor(cw)),chi=Math.min(53,clo+1),cf=(gS.tween&&gS.playing)?(cw-clo):0;
+  const pv={},cv={};
+  for(const s in GEOD.states){
+    const a=(geoPI[y]&&geoPI[y][lo]||{})[s], b=(geoPI[y]&&geoPI[y][hi]||{})[s];
+    const lp=k=>{const va=a?a[k]:0,vb=b?b[k]:0;return va+(vb-va)*f;};
+    pv[s]={t:lp('t'),s1:lp('s1'),s2:lp('s2'),s3:lp('s3'),s4:lp('s4')};
+    if(isWeather()){const ca=(geoCI[y]&&geoCI[y][clo]||{})[s],cb=(geoCI[y]&&geoCI[y][chi]||{})[s],key=SURF[gS.surface].key;
+      const va=ca?ca[key]:null,vb=cb?cb[key]:null;cv[s]=va==null?vb:(vb==null?va:va+(vb-va)*cf);}
+  }
+  return{pv,cv};
+}
+
+// ── styling ──
+function geoFillStyle(feat){const s=feat.properties.sigla,sc=inScope(s);
+  if(isWeather())return{stroke:false,fillOpacity:sc?0:0,fillColor:'#000'};
+  let col='#dde4ec',op=sc?0.92:0.32;
+  if(gS.surface==='incidence'){const inc=cumAt(gS.year,s,gS.week).t/GEOD.states[s].pop*1e5;
+    col=inc<=0?'#eef2f6':gramp('inc',Math.sqrt(Math.min(inc,4000)/4000));op=sc?0.95:0.3;}
+  return{stroke:false,fillColor:col,fillOpacity:op};}
+function geoBorderStyle(feat){const s=feat.properties.sigla,sel=gS.stateCode===s;
+  // transparent fill makes the whole state area the hover/click hit-target
+  return{fill:true,fillColor:'#000',fillOpacity:0,color:sel?'#15202b':'#aab4bf',weight:sel?2.4:0.9,opacity:inScope(s)?1:.4};}
+
+// ── bubbles ──
+function geoPieIcon(R,ser,al){const d=Math.ceil(R*2)+2,cc=d/2,rr=R;const ss=ser[0]+ser[1]+ser[2]+ser[3];const fo=(al!=null?al:.82)+0.06;
+  let svg=`<svg width="${d}" height="${d}" viewBox="0 0 ${d} ${d}" class="geo-pie">`;
+  if(ss<=0){svg+=`<circle cx="${cc}" cy="${cc}" r="${rr-0.6}" fill="#cbd5e1" fill-opacity="${(fo*0.55).toFixed(2)}" stroke="#fff" stroke-width="1.3"/>`;}
+  else{let a0=-Math.PI/2;for(let k=0;k<4;k++){const fr=ser[k]/ss;if(fr<=0.0001)continue;
+      if(fr>=0.999){svg+=`<circle cx="${cc}" cy="${cc}" r="${rr}" fill="${GSERO[k+1]}" fill-opacity="${fo.toFixed(2)}"/>`;break;}
+      const a1=a0+fr*2*Math.PI,x0=cc+rr*Math.cos(a0),y0=cc+rr*Math.sin(a0),x1=cc+rr*Math.cos(a1),y1=cc+rr*Math.sin(a1),lg=fr>0.5?1:0;
+      svg+=`<path d="M${cc} ${cc} L${x0.toFixed(1)} ${y0.toFixed(1)} A${rr} ${rr} 0 ${lg} 1 ${x1.toFixed(1)} ${y1.toFixed(1)} Z" fill="${GSERO[k+1]}" fill-opacity="${fo.toFixed(2)}"/>`;a0=a1;}
+    svg+=`<circle cx="${cc}" cy="${cc}" r="${rr}" fill="none" stroke="#fff" stroke-width="1.3"/>`;}
+  return L.divIcon({className:'',html:svg+'</svg>',iconSize:[d,d],iconAnchor:[cc,cc]});}
+function geoBubR(v,k){return Math.max(GEO_RMIN,Math.min(GEO_RMAX,k*Math.sqrt(v)));}
+function geoRenderBubbles(pv){
+  geoBubbles.clearLayers();geoMarkers={};
+  if(!gS.patientOn)return;
+  const single=gS.sero&&gS.sero!=='pie';
+  for(const s in GEOD.states){if(!inScope(s))continue;const v=pv[s];if(!v)continue;
+    const ll=[GEOD.states[s].lat,GEOD.states[s].lon];let m;
+    if(single){const cnt=v['s'+gS.sero];if(cnt<0.5)continue;
+      m=L.circleMarker(ll,{renderer:geoRenderer,radius:geoBubR(cnt,geoSeroK),color:'#fff',weight:1.2,fillColor:GSERO[gS.sero],fillOpacity:gS.bubbleAlpha});}
+    else if(gS.sero==='pie'){if(v.t<0.5)continue;
+      m=L.marker(ll,{icon:geoPieIcon(geoBubR(v.t,geoBubbleK),[v.s1,v.s2,v.s3,v.s4],gS.bubbleAlpha),keyboard:false,interactive:false});}
+    else{if(v.t<0.5)continue;
+      m=L.circleMarker(ll,{renderer:geoRenderer,radius:geoBubR(v.t,geoBubbleK),color:'#fff',weight:1.2,fillColor:'#c1121f',fillOpacity:gS.bubbleAlpha});}
+    m.addTo(geoBubbles);geoMarkers[s]=m;}
+}
+
+// ── frame render ──
+function geoRenderFrame(wkF){
+  const{pv,cv}=geoValsAt(gS.year,wkF);
+  geoFill.setStyle(geoFillStyle);
+  geoBorder.setStyle(geoBorderStyle);
+  if(isWeather()){const url=geoFieldURL(cv,SURF[gS.surface]);
+    if(!geoField){geoField=L.imageOverlay(url,FB,{opacity:.84,interactive:false,pane:'gfield'}).addTo(geoMap);}else geoField.setUrl(url);}
+  else if(geoField){geoMap.removeLayer(geoField);geoField=null;}
+  geoRenderBubbles(pv);
+  geoUpdLabels();
+  geoKPI();geoLegend();geoChip();
+  document.getElementById('geoWkV').textContent=String(gS.week).padStart(2,'0');
+  geoDrawSpark();
+}
+
+// ── overlays ──
+function geoKPI(){const ufs=scopeUFs(),wk=gS.week;
+  let wkCases=0,cumT=0,cumH=0,cumD=0,pop=0,sb=[0,0,0,0];
+  for(const s of ufs){const c=(geoPI[gS.year]&&geoPI[gS.year][wk]||{})[s];if(c){wkCases+=c.t;}
+    const cu=cumAt(gS.year,s,wk);cumT+=cu.t;cumH+=cu.h;cumD+=cu.d;pop+=GEOD.states[s].pop;
+    for(let w=1;w<=wk;w++){const cc=(geoPI[gS.year]&&geoPI[gS.year][w]||{})[s];if(cc){sb[0]+=cc.s1;sb[1]+=cc.s2;sb[2]+=cc.s3;sb[3]+=cc.s4;}}}
+  const st=sb[0]+sb[1]+sb[2]+sb[3];let dom='—',dc='#90a0b0';if(st>0){let mi=0;for(let i=1;i<4;i++)if(sb[i]>sb[mi])mi=i;dom=GSERO_N[mi+1];dc=GSERO[mi+1];}
+  document.getElementById('geoKpis').innerHTML=
+    `<div><div class="k">Cases · week ${wk}</div><div class="v">${geoFmt(wkCases)}</div></div>
+     <div><div class="k">Cumulative YTD</div><div class="v">${geoFmt(cumT)}</div></div>
+     <div><div class="k">Hospitalised</div><div class="v">${geoFmt(cumH)}</div></div>
+     <div><div class="k">Deaths</div><div class="v">${geoFmt(cumD)}</div></div>
+     <div class="full"><div><div class="k">Incidence YTD</div><div class="v">${(cumT/pop*1e5).toFixed(0)} <small>/100k</small></div></div>
+       <div style="text-align:right"><div class="k">Dominant</div><div class="v" style="color:${dc};font-size:.9rem">${dom}</div></div></div>`;}
+function geoChip(){const dot=document.getElementById('geoChipDot');let t,s,col='#c1121f';
+  if(isWeather()){const sf=SURF[gS.surface];t=sf.label;s='ERA5 · '+sf.unit+(gS.lag?` · ${Math.abs(gS.lag)}w ${gS.lag>0?'before':'after'} cases`:'');col='#1d6fb8';}
+  else if(gS.surface==='incidence'){t='Incidence /100k';s='cumulative YTD · choropleth';}
+  else if(gS.patientOn){t=gS.sero==='pie'?'Serotype composition':gS.sero?GSERO_N[gS.sero]+' cases':'Notified cases';s='weekly · bubble = case volume';col=gS.sero&&gS.sero!=='pie'?GSERO[gS.sero]:'#c1121f';}
+  else{t='Map';s='no layer active';}
+  dot.style.background=col;document.getElementById('geoChipT').textContent=t;document.getElementById('geoChipS').textContent=s;}
+function geoLegend(){const el=document.getElementById('geoLegend');
+  if(isWeather()||gS.surface==='incidence'){
+    const sf=SURF[gS.surface],rn=sf.field?sf.ramp:'inc';
+    let mn,mx;if(sf.field){mn=sf.min;mx=sf.max;}else{mn=0;mx=2000;}
+    let grad='';for(let i=0;i<=6;i++)grad+=gramp(rn,i/6)+(i<6?',':'');
+    let ticks=sf.field?`<span class="gv">${mn}</span><span class="gv">${((mn+mx)/2).toFixed(0)}</span><span class="gv">${mx}</span>`
+      :`<span class="gv">0</span><span class="gv">~500</span><span class="gv">2000+</span>`;
+    el.innerHTML=`<div class="lt"><span>${sf.field?'ERA5':'YTD'} · ${sf.unit}</span><b>${sf.label.split(' ')[0]}</b></div>
+      <div style="height:11px;border-radius:4px;background:linear-gradient(90deg,${grad});border:1px solid rgba(0,0,0,.06)"></div>
+      <div style="display:flex;justify-content:space-between;margin-top:4px;font-size:.62rem;color:var(--ink-faint)">${ticks}</div>`;
+    if(gS.patientOn&&!isWeather())el.innerHTML+=`<div class="geo-lrow" style="margin-top:8px"><span class="gv" style="color:var(--ink-faint)">circles = weekly cases</span></div>`;
+  } else if(gS.patientOn){
+    if(gS.sero==='pie'){el.innerHTML='<div class="lt"><b>Serotype</b></div>'+[1,2,3,4].map(i=>`<div class="geo-lrow"><span class="geo-lsw" style="background:${GSERO[i]}"></span>${GSERO_N[i]}</div>`).join('');}
+    else{const k=(gS.sero&&gS.sero!=='pie')?geoSeroK:geoBubbleK;const col=gS.sero?GSERO[gS.sero]:'#c1121f';
+      const refs=[22,13,6].map(r=>[r,geoFmt(Math.round(Math.pow(r/k,2)))]);
+      el.innerHTML=`<div class="lt"><b>Weekly cases</b></div><div style="display:flex;align-items:flex-end;gap:14px;padding:6px 2px 2px">
+        ${refs.map(([r,l])=>`<div style="text-align:center"><div style="width:${r*2}px;height:${r*2}px;border-radius:50%;background:${col};opacity:${gS.bubbleAlpha};margin:0 auto;border:1px solid #fff"></div><div style="font-size:.6rem;color:var(--ink-faint);margin-top:3px">${l}</div></div>`).join('')}</div>`;}
+  } else el.innerHTML='<div class="lt"><b>—</b></div><div class="geo-lrow"><span class="gv">enable a layer</span></div>';}
+function geoUpdLabels(){geoLabels.clearLayers();if(!gS.labels)return;
+  for(const s in GEOD.states){if(!inScope(s))continue;
+    geoLabels.addLayer(L.marker([GEOD.states[s].lat,GEOD.states[s].lon],{pane:'glabel',interactive:false,
+      icon:L.divIcon({className:'geo-slabel',html:s,iconSize:[24,12]})}));}}
+
+// ── tooltip ──
+function geoShowTip(s,e){const st=GEOD.states[s],wk=gS.week,reg=GEOD.region_names[st.region];
+  const c=(geoPI[gS.year]&&geoPI[gS.year][wk]||{})[s]||{t:0,h:0,d:0,s1:0,s2:0,s3:0,s4:0};
+  const cu=cumAt(gS.year,s,wk),inc=cu.t/st.pop*1e5;
+  let sb=[0,0,0,0];for(let w=1;w<=wk;w++){const cc=(geoPI[gS.year]&&geoPI[gS.year][w]||{})[s];if(cc){sb[0]+=cc.s1;sb[1]+=cc.s2;sb[2]+=cc.s3;sb[3]+=cc.s4;}}
+  const ssum=sb[0]+sb[1]+sb[2]+sb[3];let dom='—';if(ssum>0){let mi=0;for(let i=1;i<4;i++)if(sb[i]>sb[mi])mi=i;dom=GSERO_N[mi+1]+` (${(sb[mi]/ssum*100|0)}%)`;}
+  let clim='';if(isWeather()){const lw=Math.max(1,Math.min(53,wk-gS.lag));const ci=(geoCI[gS.year]&&geoCI[gS.year][lw]||{})[s];if(ci){const k=SURF[gS.surface].key;if(ci[k]!=null)clim=`<span class="l">${SURF[gS.surface].label}${gS.lag?` · wk ${lw}`:''}</span><span class="r">${SURF[gS.surface].fmt(ci[k])} ${SURF[gS.surface].unit}</span>`;}}
+  const sy=(GEOD.symptoms[gS.year]||{})[s];let syH='';
+  if(sy){const top=Object.entries(sy).sort((a,b)=>b[1]-a[1]).slice(0,4);if(top.length)syH='<div class="sy">'+top.map(([k,v])=>`<span>${SYM_LBL[k]||k} ${(v*100|0)}%</span>`).join('')+'</div>';}
+  document.getElementById('geoTip').innerHTML=
+    `<div class="nm">${st.name}<span class="rg">${reg}</span></div>
+     <div class="g"><span class="l">Cases · wk ${wk}</span><span class="r">${geoFmt(c.t)}</span>
+       <span class="l">Cumulative YTD</span><span class="r">${geoFmt(cu.t)}</span>
+       <span class="l">Incidence YTD</span><span class="r">${inc.toFixed(0)}/100k</span>
+       <span class="l">Hospitalised</span><span class="r">${geoFmt(cu.h)}</span>
+       <span class="l">Deaths</span><span class="r">${geoFmt(cu.d)}</span>
+       <span class="l">Dominant serotype</span><span class="r">${dom}</span>${clim}</div>${syH}`;
+  geoMoveTip(e);}
+function geoMoveTip(e){const tp=document.getElementById('geoTip'),wrap=document.querySelector('.geo-mapwrap').getBoundingClientRect();
+  const oe=e.originalEvent||e;let x=oe.clientX-wrap.left+14,y=oe.clientY-wrap.top+14;
+  if(x+258>wrap.width)x-=272;if(y+180>wrap.height)y-=180;tp.style.left=x+'px';tp.style.top=y+'px';tp.style.opacity=1;}
+function geoHideTip(){document.getElementById('geoTip').style.opacity=0;}
+
+// ── sparkline (weekly scope cases) ──
+function geoBuildSpark(){const ufs=scopeUFs(),v=[];for(let w=1;w<=53;w++){let s=0;for(const u of ufs){const c=(geoPI[gS.year]&&geoPI[gS.year][w]||{})[u];if(c)s+=c.t;}v.push(s);}geoSpark=v;}
+function geoDrawSpark(){const svg=document.getElementById('geoChart');if(!geoSpark)return;
+  const W=svg.clientWidth||600,H=svg.clientHeight||46,pad=3,mx=Math.max(1,...geoSpark),sx=W/52,iH=H-pad*2;
+  const X=i=>i*sx,Y=v=>pad+iH-(v/mx)*iH;let area=`M0 ${H} `,line='';geoSpark.forEach((v,i)=>{area+=`L${X(i).toFixed(1)} ${Y(v).toFixed(1)} `;line+=(i?'L':'M')+X(i).toFixed(1)+' '+Y(v).toFixed(1)+' ';});
+  area+=`L${W} ${H} Z`;const cx=X(geoWeekF-1),cv=geoSpark[Math.round(geoWeekF)-1]||0;
+  svg.innerHTML=`<defs><linearGradient id="gsg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c1121f" stop-opacity=".32"/><stop offset="1" stop-color="#c1121f" stop-opacity="0"/></linearGradient></defs>
+    <path d="${area}" fill="url(#gsg)"/><path d="${line}" fill="none" stroke="#c1121f" stroke-width="1.6"/>
+    <line x1="${cx}" y1="0" x2="${cx}" y2="${H}" stroke="#15202b" stroke-opacity=".35" stroke-dasharray="2 2"/>
+    <circle cx="${cx}" cy="${Y(cv)}" r="3.2" fill="#c1121f" stroke="#fff" stroke-width="1.4"/>
+    <rect x="0" y="0" width="${W}" height="${H}" fill="transparent" style="cursor:crosshair" id="geoSparkHit"/>`;
+  const hit=document.getElementById('geoSparkHit');const scrub=ev=>{const r=svg.getBoundingClientRect();let w=Math.round((ev.clientX-r.left)/sx)+1;w=Math.max(1,Math.min(53,w));if(w!==gS.week){gS.week=w;geoWeekF=w;geoStop();geoRenderFrame(w);}};
+  hit.onmousedown=ev=>{scrub(ev);const mv=e2=>scrub(e2),up=()=>{window.removeEventListener('mousemove',mv);window.removeEventListener('mouseup',up);};window.addEventListener('mousemove',mv);window.addEventListener('mouseup',up);};}
+
+// ── focus / scope ──
+function geoFitScope(){const ufs=new Set(scopeUFs());let b=null;geoBorder.eachLayer(l=>{if(ufs.has(l.feature.properties.sigla)){b=b?b.extend(l.getBounds()):L.latLngBounds(l.getBounds().getSouthWest(),l.getBounds().getNorthEast());}});if(b)geoMap.flyToBounds(b,{padding:[30,30],duration:.5,maxZoom:7});}
+function geoBuildStateOpts(){const sel=document.getElementById('geoState'),codes=scopeUFsAll();
+  sel.innerHTML=`<option value="all">All states${gS.region!=='all'?' in region':''}</option>`+
+    codes.map(s=>`<option value="${s}">${GEOD.states[s].name}</option>`).join('');sel.value=gS.stateCode||'all';}
+function scopeUFsAll(){return Object.keys(GEOD.states).filter(s=>gS.region==='all'||geoReg[gS.region].includes(s)).sort((a,b)=>GEOD.states[a].name.localeCompare(GEOD.states[b].name));}
+
+// ── play ──
+function geoLoop(ts){if(!gS.playing)return;if(!geoLastT)geoLastT=ts;const dt=Math.min(80,ts-geoLastT);geoLastT=ts;
+  geoWeekF+=dt/gS.speed;
+  if(geoWeekF>=53.4){const yi=GEOD.years.indexOf(gS.year);   // end of year → roll into the next year
+    if(yi<GEOD.years.length-1){gS.year=GEOD.years[yi+1];geoWeekF=1;geoOnYearChange();}
+    else if(gS.loop){gS.year=GEOD.years[0];geoWeekF=1;geoOnYearChange();}
+    else{geoStop();geoWeekF=53;gS.week=53;geoRenderFrame(53);return;}}
+  gS.week=Math.max(1,Math.min(53,Math.round(geoWeekF)));
+  if(ts-geoLastDraw>=42){geoLastDraw=ts;geoRenderFrame(geoWeekF);}
+  geoRAF=requestAnimationFrame(geoLoop);}
+function geoOnYearChange(){document.getElementById('geoYr').textContent=gS.year;geoBuildSpark();}
+function geoPlayStart(){gS.playing=true;geoLastT=0;document.getElementById('geoPlayIc').innerHTML='<rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/>';cancelAnimationFrame(geoRAF);geoRAF=requestAnimationFrame(geoLoop);}
+function geoStop(){gS.playing=false;document.getElementById('geoPlayIc').innerHTML='<path d="M8 5v14l11-7z"/>';cancelAnimationFrame(geoRAF);}
+
+// ── init ──
+async function initGeography(){
+  if(geoMap){setTimeout(()=>geoMap.invalidateSize(),60);return;}
+  try{GEOD=await fetch('data/geo.json').then(r=>{if(!r.ok)throw r;return r.json()});}
+  catch(e){document.getElementById('geoLoading').textContent='⚠ geo.json missing — run export_geo.py';return;}
+  if(!GEO){try{GEO=await fetch('brazil-states.geojson').then(r=>r.json());}catch(e){}}
+  for(const r in GEOD.region_names)geoReg[r]=[];for(const s in GEOD.states)geoReg[GEOD.states[s].region].push(s);
+  gS.year=GEOD.years.includes(2024)?2024:GEOD.years[GEOD.years.length-1];
+
+  // indices + cumulative + scales
+  let maxW=1,maxS=1;
+  for(const y of GEOD.years){const P=GEOD.patient[String(y)],C=GEOD.climate[String(y)];geoPI[y]={};geoCI[y]={};
+    if(P)for(let i=0;i<P.w.length;i++){const w=P.w[i],u=P.u[i];(geoPI[y][w]=geoPI[y][w]||{})[u]={t:P.t[i],c:P.c[i],h:P.h[i],d:P.d[i],s1:P.s1[i],s2:P.s2[i],s3:P.s3[i],s4:P.s4[i]};
+      maxW=Math.max(maxW,P.t[i]);maxS=Math.max(maxS,P.s1[i],P.s2[i],P.s3[i],P.s4[i]);}
+    if(C)for(let i=0;i<C.w.length;i++){const w=C.w[i],u=C.u[i];(geoCI[y][w]=geoCI[y][w]||{})[u]={temp:C.temp[i],rain:C.rain[i],rh:C.rh[i]};}
+    geoCum[y]={};for(const s in GEOD.states){const ct=new Float64Array(54),ch=new Float64Array(54),cd=new Float64Array(54);
+      for(let w=1;w<=53;w++){const c=geoPI[y][w]&&geoPI[y][w][s];ct[w]=ct[w-1]+(c?c.t:0);ch[w]=ch[w-1]+(c?c.h:0);cd[w]=cd[w-1]+(c?c.d:0);}geoCum[y][s]={t:ct,h:ch,d:cd};}}
+  // Fixed reference (not the global max) so 2024's extreme weeks clamp at the cap
+  // instead of shrinking every other year's bubbles. maxW unused but kept for ref.
+  geoBubbleK=GEO_RMAX/Math.sqrt(GEO_REF);geoSeroK=GEO_RMAX/Math.sqrt(Math.max(maxS*0.4,2000));
+
+  // map
+  geoMap=L.map('geo-map',{zoomControl:true,attributionControl:false,minZoom:3,maxZoom:8,zoomSnap:.25,preferCanvas:true});
+  ['gfill','gfield','gborder'].forEach((p,i)=>{geoMap.createPane(p);geoMap.getPane(p).style.zIndex=350+i*10;});
+  geoMap.createPane('gbub');geoMap.getPane('gbub').style.zIndex=620;geoMap.getPane('gbub').style.pointerEvents='none';
+  geoMap.createPane('glabel');geoMap.getPane('glabel').style.zIndex=660;geoMap.getPane('glabel').style.pointerEvents='none';
+  geoRenderer=L.canvas({pane:'gbub'});
+  geoFill=L.geoJSON(GEO,{pane:'gfill',style:geoFillStyle}).addTo(geoMap);
+  geoBorder=L.geoJSON(GEO,{pane:'gborder',style:geoBorderStyle,
+    onEachFeature:(f,l)=>l.on({mouseover:e=>geoShowTip(f.properties.sigla,e),mousemove:e=>geoMoveTip(e),mouseout:geoHideTip,
+      click:()=>{gS.stateCode=gS.stateCode===f.properties.sigla?null:f.properties.sigla;if(gS.stateCode){for(const r in geoReg)if(geoReg[r].includes(gS.stateCode)){gS.region=r;document.getElementById('geoRegion').value=r;}geoBuildStateOpts();}document.getElementById('geoState').value=gS.stateCode||'all';geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();}})}).addTo(geoMap);
+  geoBubbles=L.layerGroup().addTo(geoMap);geoLabels=L.layerGroup().addTo(geoMap);
+  geoMap.fitBounds(geoBorder.getBounds(),{padding:[16,16]});
+  geoMap.setMaxBounds(geoBorder.getBounds().pad(.5));
+  geoBuildFieldGeom();
+
+  // controls
+  document.getElementById('geoPatientToggle').onclick=function(){gS.patientOn=!gS.patientOn;this.classList.toggle('on',gS.patientOn);geoSyncSero();geoRenderFrame(geoWeekF);};
+  document.getElementById('geoSeroAll').onclick=()=>{gS.sero=gS.sero==='pie'?null:'pie';geoSyncSero();geoRenderFrame(geoWeekF);};
+  document.querySelectorAll('#geoSeroBox .geo-pill[data-sero]').forEach(b=>{if(b.dataset.sero!=='pie')b.onclick=()=>{const v=+b.dataset.sero;gS.sero=gS.sero===v?null:v;geoSyncSero();geoRenderFrame(geoWeekF);};});
+  document.querySelectorAll('.geo-opt[data-surface]').forEach(b=>b.onclick=()=>{const v=b.dataset.surface;gS.surface=gS.surface===v?null:v;geoSyncSurface();geoRenderFrame(geoWeekF);});
+  document.getElementById('geoRegion').onchange=e=>{gS.region=e.target.value;gS.stateCode=null;geoBuildStateOpts();geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();};
+  document.getElementById('geoState').onchange=e=>{gS.stateCode=e.target.value==='all'?null:e.target.value;if(gS.stateCode)for(const r in geoReg)if(geoReg[r].includes(gS.stateCode)){gS.region=r;document.getElementById('geoRegion').value=r;geoBuildStateOpts();document.getElementById('geoState').value=gS.stateCode;}geoBuildSpark();geoRenderFrame(geoWeekF);geoFitScope();};
+  document.getElementById('geoLabels').onchange=e=>{gS.labels=e.target.checked;geoUpdLabels();};
+  document.getElementById('geoTween').onchange=e=>{gS.tween=e.target.checked;};
+  document.getElementById('geoLoop').onchange=e=>{gS.loop=e.target.checked;};
+  document.getElementById('geoPlay').onclick=()=>gS.playing?geoStop():geoPlayStart();
+  document.getElementById('geoSpeed').onchange=e=>{gS.speed=+e.target.value;};
+  document.getElementById('geoAlpha').oninput=e=>{gS.bubbleAlpha=+e.target.value/100;document.getElementById('geoAlphaV').textContent=e.target.value+'%';geoRenderFrame(geoWeekF);};
+  document.getElementById('geoLag').oninput=e=>{gS.lag=+e.target.value;document.getElementById('geoLagV').textContent=`${gS.lag>0?'+':''}${gS.lag} wk`;geoRenderFrame(geoWeekF);};
+  document.getElementById('geoYrUp').onclick=()=>geoSetYear(1);document.getElementById('geoYrDown').onclick=()=>geoSetYear(-1);
+  geoMap.on('zoomend',()=>{if(gS.labels)geoUpdLabels();});
+
+  document.getElementById('geoYr').textContent=gS.year;
+  geoBuildStateOpts();geoBuildSpark();geoSyncSero();geoSyncSurface();
+  // open on the year's peak week so the first frame is rich, not empty
+  const pk=geoSpark.indexOf(Math.max(...geoSpark))+1;gS.week=pk>0?pk:10;geoWeekF=gS.week;
+  document.getElementById('geoLoading').style.display='none';
+  setTimeout(()=>geoMap.invalidateSize(),50);
+  geoRenderFrame(geoWeekF);
+}
+function geoSetYear(d){const i=GEOD.years.indexOf(gS.year);const ni=Math.max(0,Math.min(GEOD.years.length-1,i+d));gS.year=GEOD.years[ni];document.getElementById('geoYr').textContent=gS.year;geoBuildSpark();geoRenderFrame(geoWeekF);}
+function geoSyncSero(){const on=gS.patientOn;document.getElementById('geoSeroBox').style.opacity=on?1:.4;
+  document.querySelectorAll('#geoSeroBox .geo-pill').forEach(b=>b.classList.toggle('disabled',!on));
+  document.getElementById('geoSeroAll').classList.toggle('on',gS.sero==='pie');
+  document.querySelectorAll('#geoSeroBox .geo-pill[data-sero]').forEach(b=>{if(b.dataset.sero!=='pie')b.classList.toggle('on',gS.sero==+b.dataset.sero);});
+  const note=document.getElementById('geoSeroNote');note.innerHTML=gS.sero==='pie'?'Each circle is a <b>serotype pie</b> (share of serotyped cases). Circle size = total weekly cases.':gS.sero?`Circles sized by <b>${GSERO_N[gS.sero]}</b> cases only.`:'Plain circles. <b>All</b> splits each circle into a serotype pie; a single DENV button sizes circles by that serotype only.';}
+function geoSyncSurface(){document.querySelectorAll('.geo-opt[data-surface]').forEach(b=>b.classList.toggle('on',b.dataset.surface===gS.surface));
+  document.getElementById('geoLagCtrl').classList.toggle('dim',!isWeather());}
 
 boot();
 </script>
